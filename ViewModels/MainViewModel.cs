@@ -173,6 +173,13 @@ namespace SimplePOS.ViewModels
         {
             if (Cart.Count == 0) return;
 
+            // Step 1: Select Payment Method
+            var paymentWindow = new SimplePOS.Views.PaymentMethodWindow();
+            paymentWindow.Owner = System.Windows.Application.Current.MainWindow;
+            if (paymentWindow.ShowDialog() != true) return; // User cancelled
+
+            string selectedMethod = paymentWindow.SelectedMethod ?? "Efectivo";
+
             try
             {
                 PrintTicket();
