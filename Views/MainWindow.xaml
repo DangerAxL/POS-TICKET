@@ -151,7 +151,10 @@
                 <Button Content="TICKETS EMITIDOS" Style="{StaticResource SecondaryButtonStyle}" Height="50" Padding="20,0"/>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock Text="TOTAL DE VENTAS: " FontSize="18" VerticalAlignment="Center" Foreground="#64748b"/>
+                    <TextBlock Text="INICIO: " FontSize="14" VerticalAlignment="Center" Foreground="#64748b" Margin="10,0,5,0"/>
+                    <TextBox Text="{Binding InitialCash, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:F0}}" Width="80" Height="30" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"/>
+                    
+                    <TextBlock Text="TOTAL VENTAS: " FontSize="18" VerticalAlignment="Center" Foreground="#64748b" Margin="20,0,5,0"/>
                     <TextBlock Text="{Binding TotalSales, StringFormat={}{0:C0}}" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" Foreground="{StaticResource TextBrush}"/>
                 </StackPanel>
 

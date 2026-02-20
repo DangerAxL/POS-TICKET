@@ -17,6 +17,9 @@ namespace SimplePOS.ViewModels
         private string _cajaName = "Caja nro 1";
 
         [ObservableProperty]
+        private decimal _initialCash = 0.00m;
+
+        [ObservableProperty]
         private decimal _totalSales = 0.00m; 
 
         [ObservableProperty]
@@ -224,10 +227,11 @@ namespace SimplePOS.ViewModels
         [RelayCommand]
         private void CerrarCaja()
         {
-            if (_sessionItems.Count == 0) return;
+            if (_sessionItems.Count == 0 && Withdrawals.Count == 0) return;
 
             try
             {
+                PrintClosingTicket();
                 GenerateExcelReport();
 
                 // Save to Database
@@ -246,11 +250,87 @@ namespace SimplePOS.ViewModels
                 _allSalesRecords.Clear();
                 Withdrawals.Clear();
                 TotalSales = 0;
+                InitialCash = 0; // Reset for next shift? Usually yes.
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al cerrar caja: {ex.Message}");
             }
+        }
+
+        private void PrintClosingTicket()
+        {
+            using var pd = new System.Drawing.Printing.PrintDocument();
+            pd.PrintPage += (sender, e) =>
+            {
+                float yPos = 10;
+                var font = new System.Drawing.Font("Consolas", 8);
+                var boldFont = new System.Drawing.Font("Consolas", 9, System.Drawing.FontStyle.Bold);
+                var graphics = e.Graphics;
+
+                if (graphics == null) return;
+
+                // Header
+                graphics.DrawString($"LISTADO DE VENTAS DE {CajaName.ToUpper()}", boldFont, System.Drawing.Brushes.Black, 5, yPos);
+                yPos += 20;
+                graphics.DrawString("CARNAVALES 2026", boldFont, System.Drawing.Brushes.Black, 5, yPos);
+                yPos += 30;
+
+                // Products detail
+                foreach (var item in _sessionItems)
+                {
+                    graphics.DrawString(item.ProductName.PadRight(25).Substring(0, 18), font, System.Drawing.Brushes.Black, 5, yPos);
+                    graphics.DrawString(item.Quantity.ToString().PadLeft(3), font, System.Drawing.Brushes.Black, 150, yPos);
+                    graphics.DrawString(item.Subtotal.ToString("F2").PadLeft(12), font, System.Drawing.Brushes.Black, 190, yPos);
+                    yPos += 15;
+                }
+
+                graphics.DrawString("------------------------------------------", font, System.Drawing.Brushes.Black, 5, yPos);
+                yPos += 20;
+
+                // Totals
+                graphics.DrawString("TOTAL VENTAS", boldFont, System.Drawing.Brushes.Black, 5, yPos);
+                graphics.DrawString(TotalSales.ToString("F2").PadLeft(12), boldFont, System.Drawing.Brushes.Black, 190, yPos);
+                yPos += 25;
+
+                graphics.DrawString("CAMBIO INICIAL", font, System.Drawing.Brushes.Black, 5, yPos);
+                graphics.DrawString(InitialCash.ToString("F2").PadLeft(12), font, System.Drawing.Brushes.Black, 190, yPos);
+                yPos += 25;
+
+                // Withdrawals
+                foreach (var w in Withdrawals)
+                {
+                    graphics.DrawString($"RETIRO NRO° : {w.Id:D3}", font, System.Drawing.Brushes.Black, 5, yPos);
+                    graphics.DrawString($"-{w.Amount:F2}".PadLeft(12), font, System.Drawing.Brushes.Black, 190, yPos);
+                    yPos += 15;
+                }
+
+                yPos += 10;
+                decimal totalWithdrawals = Withdrawals.Sum(w => w.Amount);
+                decimal saldoTotal = TotalSales + InitialCash - totalWithdrawals;
+
+                graphics.DrawString("SALDO TOTAL DE CAJA", boldFont, System.Drawing.Brushes.Black, 5, yPos);
+                graphics.DrawString(saldoTotal.ToString("F2").PadLeft(12), boldFont, System.Drawing.Brushes.Black, 190, yPos);
+                yPos += 20;
+                graphics.DrawString("------------------------------------------", font, System.Drawing.Brushes.Black, 5, yPos);
+                yPos += 20;
+
+                decimal mpTotal = _allSalesRecords.Where(s => s.PaymentMethod == "Mercado Pago/Transferencia").Sum(s => s.Subtotal);
+                decimal cashInHand = saldoTotal - mpTotal;
+
+                graphics.DrawString("COMPROBANTES DIGITALES", font, System.Drawing.Brushes.Black, 5, yPos);
+                graphics.DrawString(mpTotal.ToString("F2").PadLeft(12), font, System.Drawing.Brushes.Black, 190, yPos);
+                yPos += 20;
+
+                graphics.DrawString("EFECTIVO EN CAJA", font, System.Drawing.Brushes.Black, 5, yPos);
+                graphics.DrawString(cashInHand.ToString("F2").PadLeft(12), font, System.Drawing.Brushes.Black, 190, yPos);
+                yPos += 30;
+
+                // Footer
+                graphics.DrawString("Xenix Sol Informáticas - Te:0340115433335", font, System.Drawing.Brushes.Black, 5, yPos);
+            };
+
+            pd.Print();
         }
 
         private void GenerateExcelReport()
