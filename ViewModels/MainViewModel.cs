@@ -187,6 +187,7 @@ namespace SimplePOS.ViewModels
                 // Track items for session
                 foreach (var item in Cart)
                 {
+                    // For the detail, we group by product name only
                     var sessionItem = _sessionItems.FirstOrDefault(i => i.ProductName == item.ProductName);
                     if (sessionItem != null)
                     {
@@ -198,9 +199,14 @@ namespace SimplePOS.ViewModels
                         { 
                             ProductName = item.ProductName, 
                             Price = item.Price, 
-                            Quantity = item.Quantity 
+                            Quantity = item.Quantity,
+                            PaymentMethod = selectedMethod // We store the method used in this sale
                         });
                     }
+
+                    // We also need to track the payment totals separately
+                    // Let's use a hidden structure or just recalculate from a new list of all sales
+                    _allSalesRecords.Add(new TicketItem { Price = item.Price, Quantity = item.Quantity, PaymentMethod = selectedMethod });
                 }
 
                 TotalSales += CurrentTotal;
@@ -212,6 +218,8 @@ namespace SimplePOS.ViewModels
                 Console.WriteLine($"Error al imprimir: {ex.Message}");
             }
         }
+
+        private List<TicketItem> _allSalesRecords = new();
 
         [RelayCommand]
         private void CerrarCaja()
@@ -235,6 +243,7 @@ namespace SimplePOS.ViewModels
 
                 // Reset session
                 _sessionItems.Clear();
+                _allSalesRecords.Clear();
                 Withdrawals.Clear();
                 TotalSales = 0;
             }
@@ -269,8 +278,23 @@ namespace SimplePOS.ViewModels
                 row++;
             }
 
-            // Footer
-            row++; // Blank row
+            // Separated Totals
+            row++;
+            decimal cashTotal = _allSalesRecords.Where(s => s.PaymentMethod == "Efectivo").Sum(s => s.Subtotal);
+            decimal mpTotal = _allSalesRecords.Where(s => s.PaymentMethod == "Mercado Pago/Transferencia").Sum(s => s.Subtotal);
+
+            worksheet.Cell(row, 2).Value = "TOTAL EFECTIVO";
+            worksheet.Cell(row, 4).Value = cashTotal;
+            worksheet.Cell(row, 4).Style.NumberFormat.Format = "#,##0.00";
+            row++;
+
+            worksheet.Cell(row, 2).Value = "TOTAL MERCADO PAGO";
+            worksheet.Cell(row, 4).Value = mpTotal;
+            worksheet.Cell(row, 4).Style.NumberFormat.Format = "#,##0.00";
+            row++;
+
+            // Global Footer
+            row++; 
             worksheet.Cell(row, 2).Value = "TOTAL VENTAS";
             worksheet.Cell(row, 2).Style.Font.SetBold();
             
@@ -286,7 +310,6 @@ namespace SimplePOS.ViewModels
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), fileName);
             workbook.SaveAs(path);
 
-            // Open the file
             Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
         }
 

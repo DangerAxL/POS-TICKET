@@ -26,6 +26,8 @@ namespace SimplePOS.Models
         private int _quantity;
 
         public decimal Subtotal => Price * Quantity;
+
+        public string PaymentMethod { get; set; } = "Efectivo";
     }
 
     public class Withdrawal
