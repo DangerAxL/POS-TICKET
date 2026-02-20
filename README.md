@@ -53,4 +53,4 @@ Formato idéntico al solicitado en Xenix Sol:
 - **Configuración**: Local, sin necesidad de Internet para operar.
 
 ---
-*Desarrollado para Xenix Sol Informáticas*
+*Desarrollado para la Gestión de Ventas POS*

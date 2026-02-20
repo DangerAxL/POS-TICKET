@@ -327,7 +327,7 @@ namespace SimplePOS.ViewModels
                 yPos += 30;
 
                 // Footer
-                graphics.DrawString("Xenix Sol Informáticas - Te:0340115433335", font, System.Drawing.Brushes.Black, 5, yPos);
+                graphics.DrawString("", font, System.Drawing.Brushes.Black, 5, yPos);
             };
 
             pd.Print();
