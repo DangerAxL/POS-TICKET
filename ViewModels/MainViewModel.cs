@@ -17,6 +17,9 @@ namespace SimplePOS.ViewModels
         private string _cajaName = "Caja nro 1";
 
         [ObservableProperty]
+        private string _businessName = "CARNAVALES 2026";
+
+        [ObservableProperty]
         private decimal _initialCash = 0.00m;
 
         [ObservableProperty]
@@ -28,6 +31,9 @@ namespace SimplePOS.ViewModels
         public ObservableCollection<Product> AvailableProducts { get; } = new();
         public ObservableCollection<TicketItem> Cart { get; } = new();
         public ObservableCollection<Withdrawal> Withdrawals { get; } = new();
+
+        public System.Windows.Visibility IsAdminVisible => 
+            (App.CurrentUser?.Role == "Admin") ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
 
         // Track items sold in current session
         private List<TicketItem> _sessionItems = new();
@@ -48,17 +54,24 @@ namespace SimplePOS.ViewModels
             if (File.Exists(configPath))
             {
                 var lines = File.ReadAllLines(configPath);
+                
                 var cajaLine = lines.FirstOrDefault(l => l.StartsWith("CajaNumber="));
                 if (cajaLine != null)
                 {
                     string num = cajaLine.Split('=')[1].Trim();
                     CajaName = $"Caja nro {num}";
                 }
+
+                var businessLine = lines.FirstOrDefault(l => l.StartsWith("BusinessName="));
+                if (businessLine != null)
+                {
+                    BusinessName = businessLine.Split('=')[1].Trim();
+                }
             }
             else
             {
                 // Create default config if it doesn't exist
-                File.WriteAllText(configPath, "[General]\nCajaNumber=1");
+                File.WriteAllText(configPath, $"[General]\nCajaNumber=1\nBusinessName={BusinessName}");
                 CajaName = "Caja nro 1";
             }
         }
@@ -172,12 +185,24 @@ namespace SimplePOS.ViewModels
         }
 
         [RelayCommand]
+        private void OpenSettings()
+        {
+            var window = new SimplePOS.Views.SettingsWindow();
+            window.Owner = System.Windows.Application.Current.MainWindow;
+            if (window.ShowDialog() == true)
+            {
+                // Reload configuration to update CajaName
+                LoadConfig();
+            }
+        }
+
+        [RelayCommand]
         private void ConfirmSale()
         {
             if (Cart.Count == 0) return;
 
             // Step 1: Select Payment Method
-            var paymentWindow = new SimplePOS.Views.PaymentMethodWindow();
+            var paymentWindow = new SimplePOS.Views.PaymentMethodWindow(CurrentTotal);
             paymentWindow.Owner = System.Windows.Application.Current.MainWindow;
             if (paymentWindow.ShowDialog() != true) return; // User cancelled
 
@@ -187,7 +212,7 @@ namespace SimplePOS.ViewModels
             {
                 PrintTicket();
                 
-                // Track items for session
+                // Track items for session detail (Product Name + Quantities)
                 foreach (var item in Cart)
                 {
                     // For the detail, we group by product name only
@@ -203,7 +228,9 @@ namespace SimplePOS.ViewModels
                             ProductName = item.ProductName, 
                             Price = item.Price, 
                             Quantity = item.Quantity,
-                            PaymentMethod = selectedMethod // We store the method used in this sale
+                            PaymentMethod = selectedMethod,
+                            CashAmount = 0, // Detail doesn't need split info per item necessarily, just aggregate
+                            DigitalAmount = 0
                         });
                     }
 
@@ -211,6 +238,16 @@ namespace SimplePOS.ViewModels
                     // Let's use a hidden structure or just recalculate from a new list of all sales
                     _allSalesRecords.Add(new TicketItem { Price = item.Price, Quantity = item.Quantity, PaymentMethod = selectedMethod });
                 }
+
+                // Global tracking for exact split amounts at shift end
+                _allSalesRecords.Add(new TicketItem 
+                { 
+                    Price = CurrentTotal, // We just need a placeholder for the total amount in this record
+                    Quantity = 1, 
+                    PaymentMethod = selectedMethod,
+                    CashAmount = paymentWindow.CashAmount,
+                    DigitalAmount = paymentWindow.DigitalAmount
+                });
 
                 TotalSales += CurrentTotal;
                 Cart.Clear();
@@ -315,7 +352,7 @@ namespace SimplePOS.ViewModels
                 graphics.DrawString("------------------------------------------", font, System.Drawing.Brushes.Black, 5, yPos);
                 yPos += 20;
 
-                decimal mpTotal = _allSalesRecords.Where(s => s.PaymentMethod == "Mercado Pago/Transferencia").Sum(s => s.Subtotal);
+                decimal mpTotal = _allSalesRecords.Sum(s => s.DigitalAmount);
                 decimal cashInHand = saldoTotal - mpTotal;
 
                 graphics.DrawString("COMPROBANTES DIGITALES", font, System.Drawing.Brushes.Black, 5, yPos);
@@ -360,8 +397,8 @@ namespace SimplePOS.ViewModels
 
             // Separated Totals
             row++;
-            decimal cashTotal = _allSalesRecords.Where(s => s.PaymentMethod == "Efectivo").Sum(s => s.Subtotal);
-            decimal mpTotal = _allSalesRecords.Where(s => s.PaymentMethod == "Mercado Pago/Transferencia").Sum(s => s.Subtotal);
+            decimal cashTotal = _allSalesRecords.Sum(s => s.CashAmount);
+            decimal mpTotal = _allSalesRecords.Sum(s => s.DigitalAmount);
 
             worksheet.Cell(row, 2).Value = "TOTAL EFECTIVO";
             worksheet.Cell(row, 4).Value = cashTotal;

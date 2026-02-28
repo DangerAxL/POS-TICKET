@@ -26,12 +26,20 @@
                 Background="{StaticResource SurfaceBrush}" 
                 CornerRadius="12" Padding="15" Margin="0,0,0,20"
                 Effect="{DynamicResource DropShadowEffect}">
-            <StackPanel Orientation="Horizontal">
-                <Border Background="#dcfce7" CornerRadius="6" Padding="8,4" Margin="0,0,15,0">
-                    <TextBlock Text="EN LINEA" Foreground="#166534" FontWeight="Bold" FontSize="12"/>
-                </Border>
-                <TextBlock Text="{Binding CajaName}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
-            </StackPanel>
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <Border Background="#dcfce7" CornerRadius="6" Padding="8,4" Margin="0,0,15,0">
+                        <TextBlock Text="EN LINEA" Foreground="#166534" FontWeight="Bold" FontSize="12"/>
+                    </Border>
+                    <TextBlock Text="{Binding CajaName}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                </StackPanel>
+                
+                <Button HorizontalAlignment="Right" VerticalAlignment="Center" 
+                        Command="{Binding OpenSettingsCommand}"
+                        Visibility="{Binding IsAdminVisible}"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Width="120" Height="35" Content="⚙ CONFIGURACIÓN"/>
+            </Grid>
         </Border>
 
         <!-- LEFT AREA: Products and Actions -->
@@ -72,8 +80,8 @@
 
             <!-- Sidebar Actions (Bottom Left) -->
             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0">
-                <Button Content="Actualizar Precios" Command="{Binding UpdatePricesCommand}" Style="{StaticResource SecondaryButtonStyle}" Width="160" Height="60"/>
-                <Button Content="Nuevo Producto" Command="{Binding CreateProductCommand}" Style="{StaticResource SecondaryButtonStyle}" Width="160" Height="60" Margin="10,0,0,0"/>
+                <Button Content="Actualizar Precios" Command="{Binding UpdatePricesCommand}" Visibility="{Binding IsAdminVisible}" Style="{StaticResource SecondaryButtonStyle}" Width="160" Height="60"/>
+                <Button Content="Nuevo Producto" Command="{Binding CreateProductCommand}" Visibility="{Binding IsAdminVisible}" Style="{StaticResource SecondaryButtonStyle}" Width="160" Height="60" Margin="10,0,0,0"/>
                 <Button Content="Cerrar Caja" Command="{Binding CerrarCajaCommand}" Style="{StaticResource SecondaryButtonStyle}" Background="#fee2e2" Foreground="#991b1b" Width="160" Height="60" Margin="10,0,0,0"/>
             </StackPanel>
         </Grid>

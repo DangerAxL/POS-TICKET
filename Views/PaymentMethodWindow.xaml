@@ -10,28 +10,81 @@
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+<<<<<<< HEAD
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Método de Pago" FontSize="22" FontWeight="Bold" Margin="0,0,0,20" Foreground="#1e293b" HorizontalAlignment="Center"/>
+        <TextBlock Text="Método de Pago" FontSize="22" FontWeight="Bold" Margin="0,0,0,10" Foreground="#1e293b" HorizontalAlignment="Center"/>
+        
+        <Border Grid.Row="1" Background="#e2e8f0" CornerRadius="8" Padding="15" Margin="0,0,0,20">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Text="TOTAL: " FontSize="20" FontWeight="SemiBold" Foreground="#334155"/>
+                <TextBlock x:Name="TotalText" Text="$0" FontSize="24" FontWeight="Bold" Foreground="#0f172a"/>
+            </StackPanel>
+        </Border>
 
-        <UniformGrid Grid.Row="1" Columns="1">
-            <Button x:Name="CashBtn" Click="Method_Click" Tag="Efectivo" Margin="0,5" Height="100" Background="#dcfce7" BorderBrush="#166534" BorderThickness="2">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="💵" FontSize="40" Margin="0,0,20,0"/>
-                    <TextBlock Text="EFECTIVO" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Foreground="#166534"/>
-                </StackPanel>
-            </Button>
+        <StackPanel Grid.Row="2" Margin="0,0,0,20">
+            <!-- Efectivo Input -->
+            <Border Background="#dcfce7" BorderBrush="#166534" BorderThickness="2" CornerRadius="8" Padding="15" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="💵" FontSize="24" Margin="0,0,10,0"/>
+                        <TextBlock Text="EFECTIVO:" FontSize="18" FontWeight="Bold" Foreground="#166534" Width="130"/>
+                    </StackPanel>
+                    
+                    <TextBox x:Name="CashInput" Grid.Column="1" FontSize="24" FontWeight="Bold" TextAlignment="Right" 
+                             VerticalContentAlignment="Center" Text="0" TextChanged="Input_TextChanged"/>
+                </Grid>
+            </Border>
 
-            <Button x:Name="MpBtn" Click="Method_Click" Tag="Mercado Pago/Transferencia" Margin="0,5" Height="100" Background="#dbeafe" BorderBrush="#1e40af" BorderThickness="2">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="📱" FontSize="40" Margin="0,0,20,0"/>
-                    <TextBlock Text="MERCADO PAGO" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" Foreground="#1e40af"/>
-                </StackPanel>
-            </Button>
-        </UniformGrid>
+            <!-- Mercado Pago Input -->
+            <Border Background="#dbeafe" BorderBrush="#1e40af" BorderThickness="2" CornerRadius="8" Padding="15">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="📱" FontSize="24" Margin="0,0,10,0"/>
+                        <TextBlock Text="MERCADO PAGO:" FontSize="18" FontWeight="Bold" Foreground="#1e40af" Width="160"/>
+                    </StackPanel>
+                    
+                    <TextBox x:Name="MpInput" Grid.Column="1" FontSize="24" FontWeight="Bold" TextAlignment="Right" 
+                             VerticalContentAlignment="Center" Text="0" TextChanged="Input_TextChanged"/>
+                </Grid>
+            </Border>
+            
+            <!-- Exact Buttons Shortcuts -->
+            <Grid Margin="0,15,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="TODO EFECTIVO" Click="AllCash_Click" Height="40" Background="#166534" Foreground="White" FontWeight="Bold" BorderThickness="0"/>
+                <Button Grid.Column="2" Content="TODO MP/TRANSF" Click="AllMp_Click" Height="40" Background="#1e40af" Foreground="White" FontWeight="Bold" BorderThickness="0"/>
+            </Grid>
+            
+            <!-- Warning -->
+            <TextBlock x:Name="WarningText" Foreground="#dc2626" FontWeight="Bold" TextAlignment="Center" Margin="0,15,0,0" Visibility="Collapsed"/>
+        </StackPanel>
 
-        <Button Grid.Row="2" Content="CANCELAR" Click="Cancel_Click" Height="50" Margin="0,20,0,0" Background="#fee2e2" Foreground="#991b1b" BorderThickness="0" FontWeight="SemiBold"/>
+        <Grid Grid.Row="3" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="CANCELAR" Click="Cancel_Click" Height="50" Background="#fee2e2" Foreground="#991b1b" BorderThickness="0" FontWeight="SemiBold"/>
+            <Button x:Name="ConfirmBtn" Grid.Column="2" Content="CONFIRMAR" Click="Confirm_Click" Height="50" Background="#10b981" Foreground="White" BorderThickness="0" FontWeight="Bold" IsEnabled="False"/>
+        </Grid>
     </Grid>
 </Window>

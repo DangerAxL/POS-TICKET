@@ -1,0 +1,58 @@
+<Window x:Class="SimplePOS.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Configuración del Sistema" Height="600" Width="400"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="#f8fafc">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="CONFIGURACIÓN" FontSize="20" FontWeight="Bold" Foreground="#1e293b" Margin="0,0,0,20"/>
+
+        <StackPanel Grid.Row="1">
+            <TextBlock Text="Número de Caja Actual:" FontSize="14" Foreground="#64748b" Margin="0,0,0,5"/>
+            <TextBox x:Name="CajaNumberTextBox" FontSize="18" Padding="10" FontWeight="Bold"/>
+            <TextBlock Text="Cambiar este valor afectará el encabezado de los tickets." 
+                       FontSize="11" Foreground="#94a3b8" Margin="0,5,0,15" TextWrapping="Wrap"/>
+
+            <TextBlock Text="Nombre de la Empresa:" FontSize="14" Foreground="#64748b" Margin="0,0,0,5"/>
+            <TextBox x:Name="BusinessNameTextBox" FontSize="18" Padding="10" FontWeight="Bold"/>
+            <TextBlock Text="Nombre que aparecerá impreso en la cabecera de los tickets (Ej: CARNAVALES 2026)." 
+                       FontSize="11" Foreground="#94a3b8" Margin="0,5,0,20" TextWrapping="Wrap"/>
+
+            <Rectangle Height="1" Fill="#e2e8f0" Margin="0,0,0,20"/>
+            
+            <TextBlock Text="AGREGAR NUEVA CAJA (Cajero)" FontSize="16" FontWeight="Bold" Foreground="#1e293b" Margin="0,0,0,10"/>
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Usuario:" FontSize="12" Foreground="#64748b" Margin="0,0,0,5"/>
+                    <TextBox x:Name="NewCashierUsername" Padding="8" FontSize="14"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Contraseña:" FontSize="12" Foreground="#64748b" Margin="0,0,0,5"/>
+                    <PasswordBox x:Name="NewCashierPassword" Padding="8" FontSize="14"/>
+                </StackPanel>
+            </Grid>
+            <Button Content="Crear Caja" Click="CreateCashier_Click" Margin="0,10,0,0" Height="35" Style="{StaticResource PosButtonStyle}" Background="#10b981" FontSize="14"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Cancelar" IsCancel="True" Width="100" Height="40" Margin="0,0,10,0"
+                    Style="{StaticResource SecondaryButtonStyle}"/>
+            <Button Content="Guardar" Click="SaveButton_Click" IsDefault="True" Width="100" Height="40"
+                    Style="{StaticResource PosButtonStyle}"/>
+        </StackPanel>
+    </Grid>
+</Window>

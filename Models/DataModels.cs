@@ -28,6 +28,10 @@ namespace SimplePOS.Models
         public decimal Subtotal => Price * Quantity;
 
         public string PaymentMethod { get; set; } = "Efectivo";
+
+        // Hybrid payment tracking
+        public decimal CashAmount { get; set; }
+        public decimal DigitalAmount { get; set; }
     }
 
     public class Withdrawal
@@ -44,8 +48,17 @@ namespace SimplePOS.Models
         public decimal TotalSales { get; set; }
     }
 
+    public class User
+    {
+        public int Id { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string PasswordHash { get; set; } = string.Empty; // In a real app we'd hash this properly
+        public string Role { get; set; } = "Cajero"; // "Admin" or "Cajero"
+    }
+
     public partial class PosDbContext : Microsoft.EntityFrameworkCore.DbContext
     {
+        public Microsoft.EntityFrameworkCore.DbSet<User> Users { get; set; } = null!;
         public Microsoft.EntityFrameworkCore.DbSet<CashClosing> CashClosings { get; set; } = null!;
         public Microsoft.EntityFrameworkCore.DbSet<Product> Products { get; set; } = null!;
 
